@@ -1,75 +1,81 @@
-workspace "Plataforma de gestion de titulos v3"  {
-    description "Sistema de gestión de titulos"
-    
+workspace "Sistema de gestión de pedidos - TURCONAGRO" {
+    description "Plataforma para gestión de pedidos de insumos agrícolas"
+
     model {
-        pEstudiante = person "Estudiante"
-        pSecretaria = person "Secretaria de carrera"
-        pPrencista = person "Prencista"
-        
-        sSenescyt = softwareSystem "Senescyt" {
-            tags "Software"
-        }
-        
-        sGestion = softwareSystem "Plataforma de gestion" {
+        cliente = person "Cliente agricultor"
+        admin = person "Administrador de pedidos"
+        bodega = person "Responsable de bodega"
+
+        sistema = softwareSystem "Sistema de Gestión de Pedidos" {
             tags "SistemaGestion"
-            
-            portalEstudiante = container "Pagina de visualización" {
+
+            portalCliente = container "Portal del Cliente" {
                 tags "AppWeb"
-                pEstudiante  -> this "Visualiza el título"
+                cliente -> this "Realiza pedidos de insumos"
             }
-            
-            portalAdministracion = container "Pagina de administración" {
+
+            portalAdmin = container "Portal de Administración" {
                 tags "AppWeb"
-                pSecretaria -> this "Generación de título"
-                pPrencista -> this "Imprime el título"
+                admin -> this "Aprueba y gestiona pedidos"
+                bodega -> this "Visualiza pedidos para despacho"
             }
-            
-            api = container "API" {
+
+            apiPedidos = container "API de Pedidos" {
                 tags "Api"
-                portalAdministracion -> this "Generacion/Impresion"
-                portalEstudiante -> this "Consulta"
-                this -> sSenescyt "Autorizar"
-                
-                
-                emailComponente  = component "Email-componente" "Envia notificaciones a los estudiantes"
-                
-                incresoComponente = component "Controlador de ingreso" "Permite el ingreso a los usuarios"
+                portalCliente -> this "Envía pedido"
+                portalAdmin -> this "Consulta/Aprueba pedido"
+                this -> baseDatos "Consulta y modifica datos"
+
+                componenteAuth = component "Componente de Autenticación" "Permite el acceso seguro de usuarios"
+                componenteCorreo = component "Componente de Notificaciones" "Envía correos de confirmación de pedidos"
             }
-            
-            basedatos = container "Base de datos" {
+
+            baseDatos = container "Base de Datos" {
                 tags "Database"
-                api -> this "Obtener/Crear/Actualizar/Eliminar"
+                apiPedidos -> this "CRUD de pedidos, usuarios, stock"
             }
         }
-        
-    
-        
     }
-    
+
     views {
-        systemContext sGestion {
+        systemContext sistema {
             include *
             autolayout lr
         }
-        
-        container sGestion {
+
+        container sistema {
             include *
             autolayout lr
         }
-        
-        component api "Componentes" {
+
+        component apiPedidos "Componentes API" {
             include *
             autolayout lr
         }
-        
+
         styles {
             element "SistemaGestion" {
-                shape Circle
+                shape RoundedBox
                 background #19b92a
                 color #000000
             }
+
+            element "AppWeb" {
+                shape WebBrowser
+                background #f9c846
+            }
+
+            element "Api" {
+                shape Hexagon
+                background #ff8c00
+            }
+
+            element "Database" {
+                shape Cylinder
+                background #b6d7a8
+            }
         }
-        
+
         theme "https://srv-si-001.utpl.edu.ec/REST_PRO_ERP/Recursos/Imagenes/themeAZ_2023.json"
     }
 }
